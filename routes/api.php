@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use GuzzleHttp\Middleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,6 +15,19 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+
+Route::prefix('auth')->group(
+    function () {
+        Route::post('/register', [AuthController::class, 'register'])->name('register');
+        Route::post('/login', [AuthController::class, 'login'])->name('login');
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::post('/otp/request', [AuthController::class, 'sendOtp'])->name('send-otp');
+        Route::post('/otp/verify', [AuthController::class, 'verifyOtp'])->name('verify-otp');
+        Route::post('/reset-password', [AuthController::class, 'reset-password'])->name('reset-password');
+        Route::post('/new-password', [AuthController::class, 'verify-otp'])->name('new-password');
+    }
+);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

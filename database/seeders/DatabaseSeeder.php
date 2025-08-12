@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,11 +13,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        DB::table('tenants')->insert([
+            'name' => 'Default Tenant',
+            'domain' => 'default.tenant.com',
+            'project_id' => 'default-project-id',
+            'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        DB::table('users')->insert([
+            'tenant_id' => 1,
+            'phone' => '01819400400',
+            'name' => 'Default User',
+            'otp' => null,
+            'email' => 'test@test.com',
+            'password' => bcrypt('password'),
+            'phone_verified_at' => null,
+            'email_verified_at' => null,
+            'remember_token' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('user_profiles')->insert([
+            'user_id' => 1,
+            'name' => 'Default',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }
