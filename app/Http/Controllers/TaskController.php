@@ -1,0 +1,111 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Applet;
+use App\Models\Task;
+use App\Models\Transaction;
+use Illuminate\Http\Request;
+
+class TaskController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
+    {
+        return Task::where('applet_id', $request->route('applet_id'))
+            ->get();
+    }
+
+    public function start_task(Request $request)
+    {
+        $task_id = $request->route('task');
+        $task = Task::find($task_id);
+        if(!$task){
+            return response()->json([
+                'success' => false,
+                'message' => 'Task not found'
+            ], 404);
+        }
+        if($task->status !== 'active'){
+            return response()->json([
+                'success' => false,
+                'message' => 'Task is not active'
+            ], 400);
+        }
+        // Logic to start the task
+        $task->status = 'active';
+        $task->start_date = now();
+        $task->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Task started successfully',
+            'task' => $task
+        ], 200);
+    }
+
+    public function stop_task(Request $request)
+    {
+        $task_id = $request->route('task');
+        $task = Task::find($task_id);
+        if(!$task){
+            return response()->json([
+                'success' => false,
+                'message' => 'Task not found'
+            ], 404);
+        }
+        if($task->status !== 'active'){
+            return response()->json([
+                'success' => false,
+                'message' => 'Task is not active'
+            ], 400);
+        }
+        // Logic to stop the task
+        $task->status = 'active';
+        $task->end_date = now();
+        $task->save();
+
+        Transaction::create([
+            'tenant_id' => auth()->user()->tenant_id,
+            'applet_id' => $task->applet_id,
+            'user_id' => auth()->user()->id,
+            'type' => 'credit',
+            'category' => 'task_completion',
+            'amount' => $task->reward,
+            'description' => "Task {$task->name} completed",
+            'status' => 'completed',
+            'balance_before' => auth()->user()->wallet->balance,
+            'balance_after' => auth()->user()->wallet->balance + $task->reward,
+        ]);
+
+        $user = auth()->user();
+        $user->wallet->balance += $task->reward;
+        $user->wallet->total_earned += $task->reward;
+        $user->wallet->last_transaction_at = now();
+        $user->wallet->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Task completed successfully',
+            'task' => $task
+        ], 200);
+    }
+
+    public function show(Request $request)
+    {
+        $task = Task::find($request->route('task'));
+        if (!$task) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Task not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'task' => $task
+        ], 200);
+    }
+}

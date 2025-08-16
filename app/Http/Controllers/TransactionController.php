@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\two_fa_auth;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
 
-class TwoFaAuthController extends Controller
+class TransactionController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,7 +34,7 @@ class TwoFaAuthController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(two_fa_auth $two_fa_auth)
+    public function show(Transaction $transaction)
     {
         //
     }
@@ -42,7 +42,7 @@ class TwoFaAuthController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(two_fa_auth $two_fa_auth)
+    public function edit(Transaction $transaction)
     {
         //
     }
@@ -50,7 +50,7 @@ class TwoFaAuthController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, two_fa_auth $two_fa_auth)
+    public function update(Request $request, Transaction $transaction)
     {
         //
     }
@@ -58,7 +58,7 @@ class TwoFaAuthController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(two_fa_auth $two_fa_auth)
+    public function destroy(Transaction $transaction)
     {
         //
     }

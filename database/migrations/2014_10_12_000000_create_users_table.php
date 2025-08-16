@@ -16,10 +16,11 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
             $table->string('phone')->unique();
             $table->string('name');
-            $table->string('otp')->nullable();
             $table->string('email')->unique()->nullable();
             $table->string('password');
-            $table->timestamp('phone_verified_at')->nullable();
+            $table->string('otp')->nullable();
+            $table->timestamp('otp_verified_at')->nullable();
+            $table->timestamp('otp_expires_at')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
