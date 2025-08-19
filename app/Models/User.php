@@ -72,4 +72,9 @@ class User extends Authenticatable
         return $this->hasMany(InvalidActivity::class);
     }
 
+    public function userIps()
+    {
+        return $this->hasMany(UserIp::class);
+    }
+
 }

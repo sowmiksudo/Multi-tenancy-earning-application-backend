@@ -89,20 +89,16 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function sendOtp(Request $request)
+    public function initiateOtpVerification(Request $request)
     {
         // Validate the request data
+
         $user = auth()->user();
-        if(!$user->id){
+        if (!$user->id) {
             return redirect()->route('login');
         }
-        $otp = rand(100000, 999999); // Generate a random 6-digit OTP
-        $user->otp = $otp;
-        $user->otp_expires_at = now()->addMinutes(10); // Set OTP expiration time
-        $user->save();
-
-        $sent = $this->sendSms($user->phone, "Your OTP is: $otp");
-        if($sent) {
+        $sent = $this->sendOtp($user);
+        if ($sent) {
             return response()->json([
                 'success' => true,
                 'message' => 'OTP sent successfully'
@@ -125,6 +121,8 @@ class AuthController extends Controller
         $user = $request->user();
         if ($user->otp === $request->otp && now()->lessThanOrEqualTo($user->otp_expires_at)) {
             $user->otp_verified_at = now();
+            $user->otp = null; // Clear the OTP after verification
+            $user->otp_expires_at = null; // Clear the expiration time
             $user->save();
 
             return response()->json([
@@ -139,8 +137,104 @@ class AuthController extends Controller
         ], 400);
     }
 
+    public function reset_password(Request $request)
+    {
+
+        if ($request->isMethod('get')) {
+            $user = User::where('phone', $request->phone)->first();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+
+            $sent = $this->sendOtp($user);
+            if ($sent) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'OTP sent successfully'
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to send OTP, contact support'
+                ], 500);
+            }
+        } else {
+
+            // Validate the request data
+            $request->validate([
+                'phone' => 'required|digits:11',
+                'new_password' => 'required|string|min:6',
+                'otp' => 'required|digits:6',
+            ]);
+
+            $user = User::where('phone', $request->phone)->first();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User not found'
+                ], 404);
+            }
+            if ($request->otp != $user->otp || now()->greaterThan($user->otp_expires_at)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid or expired OTP'
+                ], 404);
+            }
+
+            $user->password = bcrypt($request->new_password);
+            $user->otp_expires_at = null; // Clear the OTP expiration time
+            $user->otp = null; // Clear the OTP after password reset
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset successful'
+            ], 200);
+        }
+    }
+
+    public function logIp(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not authenticated'
+            ], 401);
+        }
+
+        $ipAddress = $request->ip();
+        $country = null;
+
+        // Log the IP address
+        $user->userIps()->updateOrCreate(
+            ['ip_address' => $ipAddress],
+            ['country' => $country]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'IP address logged successfully'
+        ], 200);
+    }
 
     //// HELPER FUNCTIONS ////
+
+
+    public function sendOtp($user)
+    {
+
+        $otp = rand(100000, 999999); // Generate a random 6-digit OTP
+        $user->otp = $otp;
+        $user->otp_expires_at = now()->addMinutes(10); // Set OTP expiration time
+        $user->save();
+
+        $sent = $this->sendSms($user->phone, "Your OTP is: $otp");
+        return $sent;
+    }
 
     public function sendSms($phone, $message)
     {

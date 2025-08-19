@@ -18,7 +18,7 @@ class IsOtpVerified
         if (!$request->user() || !$request->user()->otp_verified_at) {
             return response()->json([
                 'success' => false,
-                'message' => 'OTP not verified'
+                'message' => 'Phone not verified'
             ], 403);
         }
         return $next($request);

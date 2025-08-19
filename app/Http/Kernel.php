@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'otp.verified' => \App\Http\Middleware\IsOtpVerified::class,
         'tenant' => \App\Http\Middleware\EnsureTenantExists::class,
+        'check.ip' => \App\Http\Middleware\CheckLastIp::class,
     ];
 }

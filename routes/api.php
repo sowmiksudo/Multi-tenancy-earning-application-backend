@@ -23,7 +23,8 @@ Route::prefix('auth')->group(
     function () {
         Route::post('/register', [AuthController::class, 'register'])->name('register');
         Route::post('/login', [AuthController::class, 'login'])->name('login');
-        Route::post('/reset-password', [AuthController::class, 'reset-password'])->name('reset-password');
+        Route::get('/reset-password', [AuthController::class, 'reset_password'])->name('get-reset-password');
+        Route::post('/reset-password', [AuthController::class, 'reset_password'])->name('reset-password');
     }
 );
 
@@ -31,15 +32,17 @@ Route::middleware(['auth:sanctum'])
     ->group(
         function () {
             Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-            Route::post('/otp/request', [AuthController::class, 'sendOtp'])->name('send-otp');
+            Route::post('/otp/request', [AuthController::class, 'initiateOtpVerification'])->name('send-otp');
             Route::post('/otp/verify', [AuthController::class, 'verifyOtp'])->name('verify-otp');
             Route::post('/new-password', [AuthController::class, 'verify-otp'])->name('new-password');
             Route::get('/user/profile', [UserController::class, 'getUserProfile'])->name('user.profile');
             Route::post('/user/profile', [UserController::class, 'update_user_profile'])->name('user.profile.update');
+
+            Route::post('/log-ip', [AuthController::class, 'logIp'])->name('user.profile.ip');
         }
     );
 
-Route::middleware(['auth:sanctum', 'tenant'])
+Route::middleware(['auth:sanctum', 'tenant', 'check.ip', 'otp.verified'])
     ->prefix('wallet')
     ->group(
         function () {
@@ -49,7 +52,7 @@ Route::middleware(['auth:sanctum', 'tenant'])
         }
     );
 
-Route::middleware(['auth:sanctum', 'tenant'])
+Route::middleware(['auth:sanctum', 'tenant', 'check.ip', 'otp.verified'])
     ->prefix('applets')
     ->group(
         function () {
@@ -62,14 +65,14 @@ Route::middleware(['auth:sanctum', 'tenant'])
         }
     );
 
-Route::middleware(['auth:sanctum'])->prefix('support')->group(function () {
+Route::middleware(['auth:sanctum', 'check.ip', 'otp.verified', 'tenant'])->prefix('support')->group(function () {
     Route::get('tickets', [TicketController::class, 'index']);
     Route::post('tickets', [TicketController::class, 'store']);
     Route::get('tickets/{id}', [TicketController::class, 'show']);
     Route::post('tickets/{id}/reply', [TicketController::class, 'reply']);
 });
 
-Route::middleware(['auth:sanctum'])
+Route::middleware(['auth:sanctum', 'check.ip', 'otp.verified', 'tenant'])
     ->group(
         function () {
             // Invalid Activity Routes
