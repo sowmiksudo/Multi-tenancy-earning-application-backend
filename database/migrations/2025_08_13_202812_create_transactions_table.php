@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('tenant_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('applet_id')->nullable()->constrained()->nullOnDelete();
+            $table->foreignId('task_id')->nullable()->constrained()->nullOnDelete();
             $table->string('reference_id')->nullable();
             $table->string('type');  // credit, debit
             $table->string('category'); // task_completion, referral_bonus, withdrawal, etc.

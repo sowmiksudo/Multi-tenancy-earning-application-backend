@@ -21,6 +21,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'tenant_id',
+        'task_id',
         'user_id',
         'applet_id',
         'reference_id',

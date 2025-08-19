@@ -117,14 +117,25 @@ class DatabaseSeeder extends Seeder
 
         DB::table('tasks')->insert([
             'applet_id' => 1,
-            'title' => 'Default Task',
-            'description' => 'This is a default task for testing purposes.',
+            'title' => 'Admob Ad View',
+            'description' => 'Watch an Admob ad for 30 seconds',
+            'category' => 'ad_view',
             'reward' => 10.00,
+            'task_limit' => 50,
+            'status' => 'active',
+            'limit_type' => 'daily',
             'requirements' => json_encode(['geoloc','vpn']),
             'start_date' => now(),
             'end_date' => now()->addDays(7),
             'metadata' => json_encode(['key' => 'value']),
             'status' => 'active',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('settings')->insert([
+            'key' => 'invalid_activity_limit',
+            'value' => '5',
             'created_at' => now(),
             'updated_at' => now(),
         ]);

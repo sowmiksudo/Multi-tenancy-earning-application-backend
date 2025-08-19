@@ -68,3 +68,12 @@ Route::middleware(['auth:sanctum'])->prefix('support')->group(function () {
     Route::get('tickets/{id}', [TicketController::class, 'show']);
     Route::post('tickets/{id}/reply', [TicketController::class, 'reply']);
 });
+
+Route::middleware(['auth:sanctum'])
+    ->group(
+        function () {
+            // Invalid Activity Routes
+            Route::get('invalid-activities', [\App\Http\Controllers\InvalidActivityController::class, 'index'])->name('invalid-activities.index');
+            Route::post('invalid-activities', [\App\Http\Controllers\InvalidActivityController::class, 'store'])->name('invalid-activities.store');
+        }
+    );

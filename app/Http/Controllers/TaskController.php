@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Applet;
 use App\Models\Task;
+use App\Models\Applet;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class TaskController extends Controller
 {
@@ -21,19 +22,38 @@ class TaskController extends Controller
     public function start_task(Request $request)
     {
         $task_id = $request->route('task');
+
         $task = Task::find($task_id);
-        if(!$task){
+        if (!$task) {
             return response()->json([
                 'success' => false,
                 'message' => 'Task not found'
             ], 404);
         }
-        if($task->status !== 'active'){
+        if ($task->status !== 'active') {
             return response()->json([
                 'success' => false,
                 'message' => 'Task is not active'
             ], 400);
         }
+
+
+        $range = Task::find($task_id)->limit_type == 'daily' ? Carbon::today() : Carbon::now()->subDays(30); // Example: last 30 days
+        $task_history = auth()->user()->transactions()
+            ->where('task_id', $task_id)
+            ->where('type', 'credit')
+            ->where('status', 'completed')
+            ->where('created_at', '>=', $range)
+            ->get();
+
+        if (count($task_history) >= Task::find($task_id)->task_limit) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Task limit reached. Try again later.'
+            ], 400);
+        }
+
+
         // Logic to start the task
         $task->status = 'active';
         $task->start_date = now();
@@ -50,18 +70,36 @@ class TaskController extends Controller
     {
         $task_id = $request->route('task');
         $task = Task::find($task_id);
-        if(!$task){
+        if (!$task) {
             return response()->json([
                 'success' => false,
                 'message' => 'Task not found'
             ], 404);
         }
-        if($task->status !== 'active'){
+        if ($task->status !== 'active') {
             return response()->json([
                 'success' => false,
                 'message' => 'Task is not active'
             ], 400);
         }
+
+
+        $range = Task::find($task_id)->limit_type == 'daily' ? Carbon::today() : Carbon::now()->subDays(30); // Example: last 30 days
+        $task_history = auth()->user()->transactions()
+            ->where('task_id', $task_id)
+            ->where('type', 'credit')
+            ->where('status', 'completed')
+            ->where('created_at', '>=', $range)
+            ->get();
+
+        if (count($task_history) >= Task::find($task_id)->task_limit) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Task limit reached. Try again later.'
+            ], 400);
+        }
+
+
         // Logic to stop the task
         $task->status = 'active';
         $task->end_date = now();
@@ -71,6 +109,7 @@ class TaskController extends Controller
             'tenant_id' => auth()->user()->tenant_id,
             'applet_id' => $task->applet_id,
             'user_id' => auth()->user()->id,
+            'task_id' => $task->id,
             'type' => 'credit',
             'category' => 'task_completion',
             'amount' => $task->reward,
@@ -89,7 +128,8 @@ class TaskController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Task completed successfully',
-            'task' => $task
+            'task_id' => $task->id,
+            'remaining_tasks' => $task->task_limit - count($task_history) - 1,
         ], 200);
     }
 

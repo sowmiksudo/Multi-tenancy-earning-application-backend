@@ -14,12 +14,16 @@ return new class extends Migration
             $table->foreignId('applet_id')->constrained();
             $table->string('title');
             $table->text('description')->nullable();
+            $table->text('category')->nullable();
+            $table->decimal('task_limit', 10, 2)->default(0.00);
+            $table->enum('limit_type', ['daily', 'monthly'])->default('daily');
             $table->decimal('reward', 10, 2);
             $table->json('requirements')->nullable();
             $table->enum('status', ['active', 'inactive', 'archived'])->default('active');
             $table->timestamp('start_date')->nullable();
             $table->timestamp('end_date')->nullable();
             $table->json('metadata')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
