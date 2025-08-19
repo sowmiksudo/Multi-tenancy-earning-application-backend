@@ -28,7 +28,7 @@ class InvalidActivityController extends Controller
 
         $limit = Setting::where('key', 'invalid_activity_limit')->first()->value;
         if($limit > 0 && $request->user()->invalidActivities()->count() >= $limit) {
-            auth()->user()->update(['status' => 'suspended']);
+            auth()->user()->trashed();
             return response()->json([
                 'success' => false,
                 'message' => 'Invalid activity limit reached, account suspended.',

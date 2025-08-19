@@ -32,6 +32,10 @@ class EnsureTenantExists
             return response()->json(['success'=>false, 'message' => 'Project is not active'], 403);
         }
 
+        if (auth()->user()->trashed()) {
+            return response()->json(['success'=>false, 'message' => 'Your account has been suspended.'], 404);
+        }
+
         // Store the tenant in the request for later use
         $request->merge(['tenant' => $tenant]);
         $request->tenant = $tenant;
