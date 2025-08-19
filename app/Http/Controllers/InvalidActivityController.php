@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Setting;
 use Illuminate\Http\Request;
 
 class InvalidActivityController extends Controller
@@ -25,6 +26,13 @@ class InvalidActivityController extends Controller
             'description' => 'required|string',
         ]);
 
+        $limit = Setting::where('key', 'invalid_activity_limit')->first()->value;
+        if($limit > 0 && $request->user()->invalidActivities()->count() >= $limit) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid activity limit reached, account suspended.',
+            ], 403);
+        }
         // Create a new invalid activity
         $activity = $request->user()->invalidActivities()->create([
             'activity_type' => $request->activity_type,
