@@ -53,6 +53,24 @@ class TaskController extends Controller
             ], 400);
         }
 
+        // Logic to check if user has passed the break time between two tasks.
+        $last_task = auth()->user()->transactions()
+            ->where('task_id', $task_id)
+            ->where('type', 'credit')
+            ->where('status', 'completed')
+            ->latest()
+            ->first();
+        if ($last_task) {
+            $break_time = Task::find($task_id)->break_time; // in minutes
+            $next_available_time = Carbon::parse($last_task->created_at)->addMinutes($break_time);
+            if (Carbon::now()->lt($next_available_time)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You need to wait before starting this task again.',
+                    'next_available_time' => $next_available_time->toDateTimeString()
+                ], 400);
+            }
+        }
 
         // Logic to start the task
         $task->status = 'active';

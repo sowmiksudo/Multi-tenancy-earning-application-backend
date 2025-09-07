@@ -124,6 +124,7 @@ class DatabaseSeeder extends Seeder
             'task_limit' => 50,
             'status' => 'active',
             'limit_type' => 'daily',
+            'break_time' => 60,
             'requirements' => json_encode(['geoloc','vpn']),
             'start_date' => now(),
             'end_date' => now()->addDays(7),
@@ -136,6 +137,22 @@ class DatabaseSeeder extends Seeder
         DB::table('settings')->insert([
             'key' => 'invalid_activity_limit',
             'value' => '5',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('settings')->insert([
+            'key' => 'break_time',
+            'value' => '5',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('admins')->insert([
+            'name' => 'Super Admin',
+            'email' => 'testadmin@test.com',
+            'password' => bcrypt('adminpassword'),
+            'role' => 'superadmin',
             'created_at' => now(),
             'updated_at' => now(),
         ]);

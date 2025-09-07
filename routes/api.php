@@ -80,3 +80,7 @@ Route::middleware(['auth:sanctum', 'check.ip', 'otp.verified', 'tenant'])
             Route::post('invalid-activities', [\App\Http\Controllers\InvalidActivityController::class, 'store'])->name('invalid-activities.store');
         }
     );
+
+Route::middleware(['admin'])->group(function () {
+
+});

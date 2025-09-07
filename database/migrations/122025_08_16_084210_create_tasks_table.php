@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('category')->nullable();
             $table->decimal('task_limit', 10, 2)->default(0.00);
             $table->enum('limit_type', ['daily', 'monthly'])->default('daily');
+            $table->integer('break_time')->default(0); // in seconds
             $table->decimal('reward', 10, 2);
             $table->json('requirements')->nullable();
             $table->enum('status', ['active', 'inactive', 'archived'])->default('active');
